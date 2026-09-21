@@ -19,14 +19,18 @@ module top_v1 (
 	wire [7:0]  gpio_set;
 	wire [7:0]  gpio_clear;
 	wire        delay;
+	wire [3:0]  instruction_addr;
 	reg  [7:0]  gpio_out_reg;
 	reg  [7:0]  gpio_oe_reg;
+
+	assign instruction_addr = pc_out[3:0];
 
 	instruction_memory instruction_memory_i (
 		.clk            (clk),
 		.rst_n          (rst_n),
 		.instruction_in(instruction_in),
 		.write_enable   (write_enable),
+		.read_addr      (instruction_addr),
 		.instruction_out(instruction_out),
 		.fifo_empty     (fifo_empty)
 	);
