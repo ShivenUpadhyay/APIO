@@ -39,15 +39,23 @@ fi
 
 top_input="$1"
 top_name="$(basename "${top_input%.v}")"
+top_file=""
 
 if [[ "$top_input" == */* || "$top_input" == *.v ]]; then
     top_file="$repo_root/${top_input#./}"
-else
+elif [[ -f "$repo_root/$top_name.v" ]]; then
     top_file="$repo_root/$top_name.v"
+else
+    while IFS= read -r candidate; do
+        if grep -Eq "^[[:space:]]*module[[:space:]]+${top_name}([[:space:]]*#?\(|[[:space:]]*$)" "$candidate"; then
+            top_file="$candidate"
+            break
+        fi
+    done < <(find "$repo_root" -type f -name '*.v' | sort)
 fi
 
-if [[ ! -f "$top_file" ]]; then
-    echo "Error: top file not found: $top_file" >&2
+if [[ -z "$top_file" || ! -f "$top_file" ]]; then
+    echo "Error: top file or module not found: $top_input" >&2
     usage >&2
     exit 2
 fi
@@ -68,7 +76,22 @@ pdf_file="$output_dir/${top_name}_netlist.pdf"
 netlistsvg_cmd=()
 
 echo "Synthesizing top module: $top_name"
-yosys_commands="read_verilog -sv $top_file $repo_root/src/*.v; hierarchy -top $top_name; proc; check; stat; write_verilog -noattr $netlist_file"
+read_sources=("$top_file")
+for src_file in "$repo_root"/src/*.v; do
+    if [[ -f "$src_file" && "$src_file" != "$top_file" ]]; then
+        read_sources+=("$src_file")
+    fi
+done
+
+read_sources_csv=""
+for source in "${read_sources[@]}"; do
+    if [[ -n "$read_sources_csv" ]]; then
+        read_sources_csv+=" "
+    fi
+    read_sources_csv+="$source"
+done
+
+yosys_commands="read_verilog -sv $read_sources_csv; hierarchy -top $top_name; proc; check; stat; write_verilog -noattr $netlist_file"
 if [[ $show_schematic -eq 1 ]]; then
     if ! command -v xdg-open >/dev/null 2>&1; then
         echo "Error: xdg-open is required for --gates." >&2
@@ -91,15 +114,15 @@ if [[ $show_schematic -eq 1 ]]; then
         echo "Error: node is required for netlistsvg JSON preparation." >&2
         exit 127
     fi
-    yosys_commands="read_verilog -sv $top_file $repo_root/src/*.v; synth -top $top_name; abc -g simple; check; stat; write_verilog -noattr $netlist_file; write_json $json_file"
+    yosys_commands="read_verilog -sv $read_sources_csv; synth -top $top_name; abc -g simple; check; stat; write_verilog -noattr $netlist_file; write_json $json_file"
 elif [[ $show_hierarchy -eq 1 ]]; then
     if ! command -v xdot >/dev/null 2>&1; then
         echo "Error: xdot is required for --hier." >&2
         exit 127
     fi
-    yosys_commands="read_verilog -sv $top_file $repo_root/src/*.v; hierarchy -top $top_name; proc; opt; check; stat; write_verilog -noattr $netlist_file; show -format dot -prefix $output_dir/${top_name}_hierarchy $top_name"
+    yosys_commands="read_verilog -sv $read_sources_csv; hierarchy -top $top_name; proc; opt; check; stat; write_verilog -noattr $netlist_file; show -format dot -prefix $output_dir/${top_name}_hierarchy $top_name"
 else
-    yosys_commands="read_verilog -sv $top_file $repo_root/src/*.v; hierarchy -top $top_name; proc; check; stat; write_verilog -noattr $netlist_file"
+    yosys_commands="read_verilog -sv $read_sources_csv; hierarchy -top $top_name; proc; check; stat; write_verilog -noattr $netlist_file"
 fi
 
 if ! yosys -p "$yosys_commands" >"$log_file" 2>&1; then
