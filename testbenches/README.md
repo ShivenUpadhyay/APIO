@@ -27,8 +27,3 @@ The wrap test runs through `top_v1`:
 ```sh
 ./testbenches/run.sh tb_square_wave_wrap
 ```
-
-Useful signals to inspect:
-
-- Basic test: `clk`, `instruction`, `gpio_out`, and `gpio_in`.
-- Wrap test: `clk`, `pc_out`, `instruction_out`, `gpio_in`, and `dut.gpio_out_reg`.
