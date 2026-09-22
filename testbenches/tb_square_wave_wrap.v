@@ -1,6 +1,6 @@
 `timescale 1ns/1ps
 
-// Wrap test: the PC loops over SET and CLEAR without using a JUMP opcode.
+// Wrap test: the PC loops over SET and CLEAR from instruction memory.
 module tb_square_wave_wrap;
     localparam integer CLOCK_PERIOD_NS = 100;
     localparam [31:0] SET_GPIO_0 = 32'h2000_0001;
@@ -11,7 +11,7 @@ module tb_square_wave_wrap;
     reg start = 1'b0;
     reg prog_enable = 1'b0;
     reg [31:0] wrap_pc = 32'd1;
-    reg [31:0] instruction_in;
+    reg [31:0] instruction_in = 32'b0;
     reg write_enable = 1'b0;
     wire [31:0] pc_out;
     wire [31:0] instruction_out;
@@ -52,7 +52,6 @@ module tb_square_wave_wrap;
     initial begin
         $dumpfile("/tmp/apio/tb_square_wave_wrap.vcd");
         $dumpvars(0, tb_square_wave_wrap);
-        instruction_in = 32'b0;
         #15;
         rst_n = 1'b0;
         #35;
@@ -67,20 +66,19 @@ module tb_square_wave_wrap;
         @(posedge clk);
         @(negedge clk);
         prog_enable = 1'b0;
+
         start = 1'b1;
 
         for (cycle = 0; cycle < 8; cycle = cycle + 1) begin
             @(posedge clk);
             #1;
-            if (pc_out !== ((cycle + 1) % 2)) begin
+            if (pc_out !== ((cycle + 1) % 2))
                 $fatal(1, "wrap PC mismatch at cycle %0d: pc=%0d", cycle, pc_out);
-            end
-            if (gpio_in[0] !== ((cycle + 1) % 2)) begin
+            if (gpio_in[0] !== ((cycle + 1) % 2))
                 $fatal(1, "wrap wave mismatch at cycle %0d: gpio=%b", cycle, gpio_in[0]);
-            end
         end
 
-        $display("PASS: wrap square wave is 5 MHz from a 10 MHz clock without JUMP");
+        $display("PASS: wrap square wave starts only after programming");
         $finish;
     end
 endmodule

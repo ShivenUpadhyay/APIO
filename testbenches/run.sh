@@ -44,6 +44,9 @@ case "$testbench" in
     tb_square_wave_wrap)
         sources=("$testbench_file" "$repo_root/top_v1.v" "$repo_root/src/"*.v)
         ;;
+    tb_ass_square_wave)
+        sources=("$testbench_file" "$repo_root/top_v1.v" "$repo_root/src/"*.v)
+        ;;
     *)
         echo "Error: no source mapping is defined for $testbench" >&2
         exit 2
@@ -57,17 +60,21 @@ if ! iverilog -g2012 -Wall -s "$testbench" -o "$simulator" "${sources[@]}" >"$lo
 fi
 
 echo "Running $testbench..."
-if ! vvp "$simulator" >>"$log_file" 2>&1; then
-    cat "$log_file"
-    exit 1
-fi
+vvp "$simulator" >>"$log_file" 2>&1
+simulation_status=$?
 
 cat "$log_file"
-echo "Waveform: $vcd_file"
+if [[ -f "$vcd_file" ]]; then
+    echo "Waveform: $vcd_file"
+fi
 
-if command -v gtkwave >/dev/null 2>&1; then
+if [[ -f "$vcd_file" ]] && command -v gtkwave >/dev/null 2>&1; then
     gtkwave "$vcd_file" >/tmp/apio/"$testbench".gtkwave.log 2>&1 &
     echo "GTKWave started (PID $!)."
-else
+elif ! command -v gtkwave >/dev/null 2>&1; then
     echo "GTKWave is not installed; skipping waveform viewer." >&2
+else
+    echo "No waveform was generated; skipping GTKWave." >&2
 fi
+
+exit "$simulation_status"

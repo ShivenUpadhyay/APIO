@@ -52,7 +52,8 @@ module top_v1 (
 		.pc_out     (pc_out),
 		.wrap_pc    (wrap_pc),
 		.jmp        (jump),
-		.jmp_addr   (jump_addr)
+		.jmp_addr   (jump_addr),
+		.delay      (delay)
 	);
 
 	// Set and clear instructions update persistent GPIO output state.
