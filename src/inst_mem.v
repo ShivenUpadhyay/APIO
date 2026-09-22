@@ -1,3 +1,7 @@
+/*
+Instruction memory module for storing instructions to be executed by the processor.
+The module is parameterized to allow for different memory depths and data widths.
+*/
 module instruction_memory #(
     parameter integer MEM_DEPTH = 16,
     parameter integer DATA_WIDTH = 32,
@@ -6,7 +10,7 @@ module instruction_memory #(
     input  wire        clk,
     input  wire        rst_n,
     input  wire [DATA_WIDTH-1:0] instruction_in,
-    input  wire        write_enable,
+    input  wire        write_enable,  /*required to write to the instruction memory; write_ptr is incremented on each write */
     input  wire [ADDR_WIDTH-1:0] read_addr,
     output wire [DATA_WIDTH-1:0] instruction_out,
     output wire        fifo_empty

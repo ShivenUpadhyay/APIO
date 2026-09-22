@@ -7,7 +7,7 @@ module program_counter #(
     input wire                         rst_n,
     input wire                         start,      //enables execution of counter, delay module will deassert to stop the counter
     output reg [COUNTER_WIDTH-1:0] pc_out,
-    input  wire [COUNTER_WIDTH-1:0] wrap_pc,  /*address from whcih the counter wraps to 0x0; inclusive terminal address, 
+    input  wire [COUNTER_WIDTH-1:0] wrap_pc,  /*address from which the counter wraps to 0x0; inclusive terminal address, 
                                               behaves like a jmp bus does not consume an extra instruction */
     input wire                         jmp,  /*indicates a jmp instruction is being executed; 
                                             has priority over the normal increment/wrap sequence */

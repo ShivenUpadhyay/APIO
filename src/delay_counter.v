@@ -1,4 +1,6 @@
-// Counts instruction delay cycles and gates instruction execution.
+/*
+Counts instruction delay cycles and gates instruction execution.
+*/
 module delay_counter #(
     parameter integer DELAY_WIDTH = 4
 ) (
@@ -6,7 +8,7 @@ module delay_counter #(
     input wire                     rst_n,
     input wire                     start,
     input wire [DELAY_WIDTH-1:0]   delay_value,
-    output wire                    execute_enable
+    output wire                    execute_enable /* controls PC execution */
 );
     reg [DELAY_WIDTH-1:0] delay_count;
 
