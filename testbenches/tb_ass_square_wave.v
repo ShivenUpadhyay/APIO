@@ -2,10 +2,8 @@
 
 module tb_ass_square_wave;
     localparam integer CLOCK_PERIOD_NS = 100;
-    localparam [31:0] SET_GPIO_0 = 32'h2000_0001;
-    localparam [31:0] DELAY = 32'h4000_0000;
-    localparam [31:0] CLEAR_GPIO_0 = 32'h3000_0001;
-    localparam [31:0] JUMP_LOOP = 32'h1000_0000;
+    localparam [31:0] SET_GPIO_0_DELAY_3 = 32'h2300_0001;
+    localparam [31:0] CLEAR_GPIO_0_DELAY_3 = 32'h3300_0001;
 
     reg clk = 1'b0;
     reg rst_n = 1'b1;
@@ -27,7 +25,7 @@ module tb_ass_square_wave;
         .rst_n(rst_n),
         .start(start),
         .prog_enable(prog_enable),
-        .wrap_pc(32'd4),
+        .wrap_pc(32'd1),
         .instruction_in(instruction_in),
         .write_enable(write_enable),
         .pc_out(pc_out),
@@ -57,12 +55,9 @@ module tb_ass_square_wave;
         #35;
         rst_n = 1'b1;
 
-        // SET GPIO[0]; DELAY; CLEAR GPIO[0]; DELAY; loop: JUMP loop.
-        write_instruction(SET_GPIO_0);
-        write_instruction(DELAY);
-        write_instruction(CLEAR_GPIO_0);
-        write_instruction(DELAY);
-        write_instruction(JUMP_LOOP);
+        // SET GPIO[0], delay 3; CLEAR GPIO[0], delay 3.
+        write_instruction(SET_GPIO_0_DELAY_3);
+        write_instruction(CLEAR_GPIO_0_DELAY_3);
 
         @(negedge clk);
         prog_enable = 1'b1;
@@ -71,29 +66,23 @@ module tb_ass_square_wave;
         prog_enable = 1'b0;
         start = 1'b1;
 
-        for (cycle = 0; cycle < 7; cycle = cycle + 1) begin
+        for (cycle = 0; cycle < 8; cycle = cycle + 1) begin
             @(posedge clk);
             #1;
             case (cycle)
                 0: if (pc_out !== 32'd1 || gpio_in[0] !== 1'b1)
                     $fatal(1, "SET mismatch: pc=%0d gpio=%b", pc_out, gpio_in[0]);
-                1: if (pc_out !== 32'd1)
-                    $fatal(1, "first DELAY did not hold PC: pc=%0d", pc_out);
-                2: if (pc_out !== 32'd2)
-                    $fatal(1, "first DELAY did not complete: pc=%0d", pc_out);
-                3: if (pc_out !== 32'd3 || gpio_in[0] !== 1'b0)
+                1, 2, 3: if (pc_out !== 32'd1 || gpio_in[0] !== 1'b1)
+                    $fatal(1, "SET delay mismatch: pc=%0d gpio=%b", pc_out, gpio_in[0]);
+                4: if (pc_out !== 32'd0 || gpio_in[0] !== 1'b0)
                     $fatal(1, "CLEAR mismatch: pc=%0d gpio=%b", pc_out, gpio_in[0]);
-                4: if (pc_out !== 32'd3)
-                    $fatal(1, "second DELAY did not hold PC: pc=%0d", pc_out);
-                5: if (pc_out !== 32'd4)
-                    $fatal(1, "second DELAY did not complete: pc=%0d", pc_out);
-                6: if (pc_out !== 32'd0)
-                    $fatal(1, "JUMP mismatch: pc=%0d", pc_out);
+                5, 6, 7: if (pc_out !== 32'd0 || gpio_in[0] !== 1'b0)
+                    $fatal(1, "CLEAR delay mismatch: pc=%0d gpio=%b", pc_out, gpio_in[0]);
                 default: ;
             endcase
         end
 
-        $display("PASS: assembly square-wave program executes with one-cycle delays");
+        $display("PASS: assembly square-wave program executes with embedded delays");
         $finish;
     end
 endmodule

@@ -27,3 +27,7 @@ The wrap test runs through `top_v1`:
 ```sh
 ./testbenches/run.sh tb_square_wave_wrap
 ```
+
+The wrap test programs `SET GPIO[0], delay 3` and `CLEAR GPIO[0], delay 3`
+into instruction memory. It verifies an `f_clk / 8` square wave and confirms
+that the PC wraps from the second instruction back to address zero.

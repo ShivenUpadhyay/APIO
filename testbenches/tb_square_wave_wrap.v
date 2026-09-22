@@ -1,10 +1,10 @@
 `timescale 1ns/1ps
 
-// Wrap test: the PC loops over SET and CLEAR from instruction memory.
+// Wrap test: each instruction contains its own three-cycle delay.
 module tb_square_wave_wrap;
     localparam integer CLOCK_PERIOD_NS = 100;
-    localparam [31:0] SET_GPIO_0 = 32'h2000_0001;
-    localparam [31:0] CLEAR_GPIO_0 = 32'h3000_0001;
+    localparam [31:0] SET_GPIO_0_DELAY_3 = 32'h2300_0001;
+    localparam [31:0] CLEAR_GPIO_0_DELAY_3 = 32'h3300_0001;
 
     reg clk = 1'b0;
     reg rst_n = 1'b1;
@@ -57,8 +57,8 @@ module tb_square_wave_wrap;
         #35;
         rst_n = 1'b1;
 
-        write_instruction(SET_GPIO_0);
-        write_instruction(CLEAR_GPIO_0);
+        write_instruction(SET_GPIO_0_DELAY_3);
+        write_instruction(CLEAR_GPIO_0_DELAY_3);
 
         // Program the inclusive terminal address; no jump instruction is used.
         @(negedge clk);
@@ -69,12 +69,12 @@ module tb_square_wave_wrap;
 
         start = 1'b1;
 
-        for (cycle = 0; cycle < 8; cycle = cycle + 1) begin
+        for (cycle = 0; cycle < 16; cycle = cycle + 1) begin
             @(posedge clk);
             #1;
-            if (pc_out !== ((cycle + 1) % 2))
+            if (pc_out !== ((cycle < 4 || cycle >= 8 && cycle < 12) ? 32'd1 : 32'd0))
                 $fatal(1, "wrap PC mismatch at cycle %0d: pc=%0d", cycle, pc_out);
-            if (gpio_in[0] !== ((cycle + 1) % 2))
+            if (gpio_in[0] !== ((cycle < 4 || cycle >= 8 && cycle < 12) ? 1'b1 : 1'b0))
                 $fatal(1, "wrap wave mismatch at cycle %0d: gpio=%b", cycle, gpio_in[0]);
         end
 

@@ -3,48 +3,32 @@ module program_counter #(
     parameter integer COUNTER_WIDTH = 32
 ) (
     input wire                         clk,
-    input wire                         prog_enable,
+    input wire                         prog_enable,  //assert when programming the wrap address; counter is stopped
     input wire                         rst_n,
-    input wire                         start,
-    input wire                         delay,
+    input wire                         start,      //enables execution of counter, delay module will deassert to stop the counter
     output reg [COUNTER_WIDTH-1:0] pc_out,
-    input  wire [COUNTER_WIDTH-1:0] wrap_pc,
-    input wire                         jmp,
+    input  wire [COUNTER_WIDTH-1:0] wrap_pc,  /*address from whcih the counter wraps to 0x0; inclusive terminal address, 
+                                              behaves like a jmp bus does not consume an extra instruction */
+    input wire                         jmp,  /*indicates a jmp instruction is being executed; 
+                                            has priority over the normal increment/wrap sequence */
     input wire [COUNTER_WIDTH-1:0] jmp_addr
 );
     // The counter returns to zero after reaching this terminal address.
     reg [COUNTER_WIDTH-1:0] wrap_reg;
-    reg delay_pending;
 
     always @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
             pc_out <= 0;
             wrap_reg <= 0;
-            delay_pending <= 1'b0;
         end 
         // Programming must occur while stopped; it has priority over execution.
         else if (prog_enable)
          begin
             wrap_reg <= wrap_pc;
-            delay_pending <= 1'b0;
         end else if (start)
          begin
-            // A delay instruction holds the current instruction for one extra cycle.
-            if (delay_pending) begin
-                delay_pending <= 1'b0;
-                if (jmp)
-                 begin
-                    pc_out <= jmp_addr;
-                end 
-                else if (pc_out == wrap_reg) begin
-                    pc_out <= 0;
-                end else begin
-                    pc_out <= pc_out + 1'b1;
-                end
-            end else if (delay) begin
-                delay_pending <= 1'b1;
             // Jumps have priority over the normal increment/wrap sequence.
-            end else if (jmp)
+            if (jmp)
              begin
                 pc_out <= jmp_addr;
             end 

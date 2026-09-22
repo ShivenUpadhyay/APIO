@@ -12,7 +12,7 @@ module tb_square_wave_basic;
     wire [31:0] jump_addr;
     wire [7:0] gpio_set;
     wire [7:0] gpio_clear;
-    wire delay;
+    wire [3:0] delay_count;
     reg [7:0] gpio_out = 8'b0;
     reg [7:0] gpio_oe = 8'b0;
     wire [7:0] gpio_in;
@@ -27,7 +27,7 @@ module tb_square_wave_basic;
         .jump_addr(jump_addr),
         .gpio_set(gpio_set),
         .gpio_clear(gpio_clear),
-        .delay(delay)
+        .delay_count(delay_count)
     );
 
     aio_gpio gpio_i (

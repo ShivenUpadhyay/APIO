@@ -18,7 +18,8 @@ module top_v1 (
 	wire [31:0] jump_addr;
 	wire [7:0]  gpio_set;
 	wire [7:0]  gpio_clear;
-	wire        delay;
+	wire [3:0]  delay_count;
+	wire        execute_enable;
 	wire [3:0]  instruction_addr;
 	reg  [7:0]  gpio_out_reg;
 	reg  [7:0]  gpio_oe_reg;
@@ -41,19 +42,26 @@ module top_v1 (
 		.jump_addr  (jump_addr),
 		.gpio_set   (gpio_set),
 		.gpio_clear (gpio_clear),
-		.delay      (delay)
+		.delay_count(delay_count)
+	);
+
+	delay_counter delay_counter_i (
+		.clk            (clk),
+		.rst_n          (rst_n),
+		.start          (start),
+		.delay_value    (delay_count),
+		.execute_enable (execute_enable)
 	);
 
 	program_counter program_counter_i (
 		.clk        (clk),
 		.prog_enable(prog_enable),
 		.rst_n      (rst_n),
-		.start      (start),
+		.start      (execute_enable),
 		.pc_out     (pc_out),
 		.wrap_pc    (wrap_pc),
 		.jmp        (jump),
-		.jmp_addr   (jump_addr),
-		.delay      (delay)
+		.jmp_addr   (jump_addr)
 	);
 
 	// Set and clear instructions update persistent GPIO output state.
@@ -61,7 +69,7 @@ module top_v1 (
 		if (!rst_n) begin
 			gpio_out_reg <= 8'b0;
 			gpio_oe_reg <= 8'b0;
-		end else begin
+		end else if (execute_enable) begin
 			gpio_out_reg <= (gpio_out_reg | gpio_set) & ~gpio_clear;
 			gpio_oe_reg <= gpio_oe_reg | gpio_set | gpio_clear;
 		end
