@@ -2,7 +2,7 @@
 Instruction memory module for storing instructions to be executed by the processor.
 The module is parameterized to allow for different memory depths and data widths.
 */
-module instruction_memory #(
+module inst_mem #(
     parameter integer MEM_DEPTH = 16,
     parameter integer DATA_WIDTH = 32,
     parameter integer ADDR_WIDTH = $clog2(MEM_DEPTH)

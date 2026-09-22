@@ -2,7 +2,7 @@
  * GPIO Module
  * Supports bidirectional GPIO functionality with output enable control.
  */
-module aio_gpio #(
+module gpio #(
     parameter integer GPIO_WIDTH = 8
 ) (
     input  wire       clk,

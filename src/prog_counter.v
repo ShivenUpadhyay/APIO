@@ -1,5 +1,5 @@
 // Synchronous program counter with jump and programmable wrap support.
-module program_counter #(
+module prog_counter #(
     parameter integer COUNTER_WIDTH = 32
 ) (
     input wire                         clk,

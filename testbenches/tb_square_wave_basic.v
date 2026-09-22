@@ -21,7 +21,7 @@ module tb_square_wave_basic;
 
     always #(CLOCK_PERIOD_NS / 2) clk = ~clk;
 
-    decoder decoder_i (
+    decoder_v1 decoder_i (
         .instruction(instruction),
         .jump(jump),
         .jump_addr(jump_addr),
@@ -30,7 +30,7 @@ module tb_square_wave_basic;
         .delay_count(delay_count)
     );
 
-    aio_gpio gpio_i (
+    gpio gpio_i (
         .clk(clk),
         .gpio_out(gpio_out),
         .gpio_oe(gpio_oe),

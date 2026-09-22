@@ -5,19 +5,20 @@
 The current design is a small programmed instruction engine:
 
 ```text
-instruction_in -> instruction_memory -> decoder -> control signals
+instruction_in -> inst_mem -> decoder_v1 -> control signals
                      ^                       |
                      |                       v
-                     +------------------- program_counter <- delay_counter
+                     +------------------- prog_counter <- delay_counter
                                               ^
                                               |
                                              start
 ```
 
-`instruction_memory` is programmed sequentially while `write_enable` is high.
-The program counter addresses the memory, and `decoder` translates the current
-instruction into GPIO, jump, and delay controls. `program_counter` advances
-only when the internal execution enable from `delay_counter` is asserted.
+`inst_mem` is programmed sequentially while `write_enable` is high.
+The program counter addresses the memory, and `decoder_v1` translates the
+current instruction into GPIO, jump, and delay controls. `prog_counter`
+advances only when the internal execution enable from `delay_counter` is
+asserted.
 
 The external `start` input enables execution. It does not directly force the
 PC to increment: the delay counter can temporarily suppress the internal

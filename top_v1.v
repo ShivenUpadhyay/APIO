@@ -26,7 +26,7 @@ module top_v1 (
 
 	assign instruction_addr = pc_out[3:0];
 
-	instruction_memory instruction_memory_i (
+	inst_mem instruction_memory_i (
 		.clk            (clk),
 		.rst_n          (rst_n),
 		.instruction_in(instruction_in),
@@ -36,7 +36,7 @@ module top_v1 (
 		.fifo_empty     (fifo_empty)
 	);
 
-	decoder decoder_i (
+	decoder_v1 decoder_i (
 		.instruction(instruction_out),
 		.jump       (jump),
 		.jump_addr  (jump_addr),
@@ -53,7 +53,7 @@ module top_v1 (
 		.execute_enable (execute_enable)
 	);
 
-	program_counter program_counter_i (
+	prog_counter program_counter_i (
 		.clk        (clk),
 		.prog_enable(prog_enable),
 		.rst_n      (rst_n),
@@ -75,7 +75,7 @@ module top_v1 (
 		end
 	end
 
-	aio_gpio gpio_i (
+	gpio gpio_i (
 		.clk    (clk),
 		.gpio_out(gpio_out_reg),
 		.gpio_oe (gpio_oe_reg),

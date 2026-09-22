@@ -1,7 +1,7 @@
 /* Decodes instructions with an embedded delay field.
 Format: [31:28] opcode, [27:24] delay cycles, [23:0] operand.
 */
-module decoder #(
+module decoder_v1 #(
 	parameter integer INSTRUCTION_WIDTH = 32,
 	parameter integer GPIO_WIDTH = 8
 ) (
