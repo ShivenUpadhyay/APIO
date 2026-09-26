@@ -18,33 +18,46 @@ module top_v1 (
 	wire [31:0] jump_addr;
 	wire [7:0]  gpio_set;
 	wire [7:0]  gpio_clear;
-	wire        delay;
+	wire [3:0]  delay_count;
+	wire        execute_enable;
+	wire [3:0]  instruction_addr;
 	reg  [7:0]  gpio_out_reg;
 	reg  [7:0]  gpio_oe_reg;
 
-	instruction_memory instruction_memory_i (
+	assign instruction_addr = pc_out[3:0];
+
+	inst_mem instruction_memory_i (
 		.clk            (clk),
 		.rst_n          (rst_n),
 		.instruction_in(instruction_in),
 		.write_enable   (write_enable),
+		.read_addr      (instruction_addr),
 		.instruction_out(instruction_out),
 		.fifo_empty     (fifo_empty)
 	);
 
-	decoder decoder_i (
+	decoder_v1 decoder_i (
 		.instruction(instruction_out),
 		.jump       (jump),
 		.jump_addr  (jump_addr),
 		.gpio_set   (gpio_set),
 		.gpio_clear (gpio_clear),
-		.delay      (delay)
+		.delay_count(delay_count)
 	);
 
-	program_counter program_counter_i (
+	delay_counter delay_counter_i (
+		.clk            (clk),
+		.rst_n          (rst_n),
+		.start          (start),
+		.delay_value    (delay_count),
+		.execute_enable (execute_enable)
+	);
+
+	prog_counter program_counter_i (
 		.clk        (clk),
 		.prog_enable(prog_enable),
 		.rst_n      (rst_n),
-		.start      (start),
+		.start      (execute_enable),
 		.pc_out     (pc_out),
 		.wrap_pc    (wrap_pc),
 		.jmp        (jump),
@@ -56,13 +69,13 @@ module top_v1 (
 		if (!rst_n) begin
 			gpio_out_reg <= 8'b0;
 			gpio_oe_reg <= 8'b0;
-		end else begin
+		end else if (execute_enable) begin
 			gpio_out_reg <= (gpio_out_reg | gpio_set) & ~gpio_clear;
 			gpio_oe_reg <= gpio_oe_reg | gpio_set | gpio_clear;
 		end
 	end
 
-	aio_gpio gpio_i (
+	gpio gpio_i (
 		.clk    (clk),
 		.gpio_out(gpio_out_reg),
 		.gpio_oe (gpio_oe_reg),
