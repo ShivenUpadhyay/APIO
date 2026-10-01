@@ -26,7 +26,7 @@ module tb_ass_square_wave;
         .start(start),
         .prog_enable(prog_enable),
 		.wrap_target(32'd0),
-        .wrap_pc(32'd1),
+        .wrap_address(32'd1),
         .instruction_in(instruction_in),
         .write_enable(write_enable),
         .pc_out(pc_out),

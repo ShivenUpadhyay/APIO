@@ -1,6 +1,7 @@
 ; Each GPIO instruction executes once, followed by three wait cycles.
 .program square_wave
 
+JUMP 1
 .wrap_target
 SET GPIO[0], delay 3
 CLEAR GPIO[0], delay 3
