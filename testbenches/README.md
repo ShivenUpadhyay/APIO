@@ -31,3 +31,15 @@ The wrap test runs through `top_v1`:
 The wrap test programs `SET GPIO[0], delay 3` and `CLEAR GPIO[0], delay 3`
 into instruction memory. It verifies an `f_clk / 8` square wave and confirms
 that the PC wraps from the second instruction back to address zero.
+
+Program examples live under `programs/`. Each example pairs a plain-English
+`.txt` source file with a self-checking testbench. The shared assembler converts
+instructions and wrap directives to hex and metadata before simulation:
+
+```sh
+./testbenches/run.sh square_wave
+```
+
+`.wrap_target` selects the first address in the loop, and `.wrap` marks its
+inclusive final instruction. The testbench loads both values into the
+programmable program counter before starting execution.

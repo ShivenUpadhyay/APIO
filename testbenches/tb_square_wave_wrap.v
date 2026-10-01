@@ -27,6 +27,7 @@ module tb_square_wave_wrap;
         .rst_n(rst_n),
         .start(start),
         .prog_enable(prog_enable),
+		.wrap_target(32'd0),
         .wrap_pc(wrap_pc),
         .instruction_in(instruction_in),
         .write_enable(write_enable),
