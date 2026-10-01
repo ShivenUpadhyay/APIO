@@ -51,6 +51,8 @@ module tb_fractional_clock_divider;
     endtask
 
     initial begin
+        $dumpfile("/tmp/apio/tb_fractional_clock_divider.vcd");
+        $dumpvars(0, tb_fractional_clock_divider);
         #12;
         rst_n = 1'b1;
         enable = 1'b1;
