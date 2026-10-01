@@ -20,7 +20,7 @@ def assemble(source: Path) -> tuple[list[int], int, int]:
     instructions: list[tuple[int, str]] = []
     program_name = None
     wrap_target = None
-    wrap_pc = None
+    wrap_address = None
     after_wrap = False
 
     for line_number, raw_line in enumerate(source.read_text(encoding="utf-8").splitlines(), 1):
@@ -46,14 +46,14 @@ def assemble(source: Path) -> tuple[list[int], int, int]:
                 program_name = directive.group(1)
                 continue
             if re.fullmatch(r"\.wrap_target", line, re.IGNORECASE):
-                if wrap_target is not None or wrap_pc is not None:
+                if wrap_target is not None or wrap_address is not None:
                     raise ValueError(f"{source}:{line_number}: misplaced or duplicate .wrap_target")
                 wrap_target = len(instructions)
                 continue
             if re.fullmatch(r"\.wrap", line, re.IGNORECASE):
-                if wrap_target is None or wrap_pc is not None or len(instructions) <= wrap_target:
+                if wrap_target is None or wrap_address is not None or len(instructions) <= wrap_target:
                     raise ValueError(f"{source}:{line_number}: .wrap must follow at least one instruction after .wrap_target")
-                wrap_pc = len(instructions) - 1
+                wrap_address = len(instructions) - 1
                 after_wrap = True
                 continue
             raise ValueError(f"{source}:{line_number}: unsupported directive '{line}'")
@@ -64,7 +64,7 @@ def assemble(source: Path) -> tuple[list[int], int, int]:
 
     if program_name is None:
         raise ValueError(f"{source}: missing .program directive")
-    if wrap_target is None or wrap_pc is None:
+    if wrap_target is None or wrap_address is None:
         raise ValueError(f"{source}: .wrap_target and .wrap directives are required")
 
     words: list[int] = []
@@ -98,7 +98,7 @@ def assemble(source: Path) -> tuple[list[int], int, int]:
 
     if not words:
         raise ValueError(f"{source}: no instructions found")
-    return words, wrap_target, wrap_pc
+    return words, wrap_target, wrap_address
 
 
 def main() -> int:
@@ -110,19 +110,19 @@ def main() -> int:
     output = arguments.output or arguments.source.with_suffix(".hex")
 
     try:
-        words, wrap_target, wrap_pc = assemble(arguments.source)
+        words, wrap_target, wrap_address = assemble(arguments.source)
         output.parent.mkdir(parents=True, exist_ok=True)
         output.write_text("".join(f"{word:08x}\n" for word in words), encoding="ascii")
         if arguments.metadata_output:
             arguments.metadata_output.parent.mkdir(parents=True, exist_ok=True)
             arguments.metadata_output.write_text(
-                f"{len(words)} {wrap_target} {wrap_pc}\n", encoding="ascii"
+                f"{len(words)} {wrap_target} {wrap_address}\n", encoding="ascii"
             )
     except (OSError, ValueError) as error:
         print(error, file=sys.stderr)
         return 1
 
-    print(f"Assembled {len(words)} instructions: {output} (wrap target {wrap_target}, wrap end {wrap_pc})")
+    print(f"Assembled {len(words)} instructions: {output} (wrap target {wrap_target}, wrap address {wrap_address})")
     return 0
 
 

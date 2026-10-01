@@ -5,7 +5,7 @@ module top_v1 (
 	input  wire        start,
 	input  wire        prog_enable,
 	input  wire [31:0] wrap_target,
-	input  wire [31:0] wrap_pc,
+	input  wire [31:0] wrap_address,
 	input  wire [31:0] instruction_in,
 	input  wire        write_enable,
 	output wire [31:0] pc_out,
@@ -61,7 +61,7 @@ module top_v1 (
 		.start      (execute_enable),
 		.pc_out     (pc_out),
 		.wrap_target(wrap_target),
-		.wrap_pc    (wrap_pc),
+		.wrap_address(wrap_address),
 		.jmp        (jump),
 		.jmp_addr   (jump_addr)
 	);

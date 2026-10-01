@@ -40,6 +40,7 @@ instructions and wrap directives to hex and metadata before simulation:
 ./testbenches/run.sh square_wave
 ```
 
-`.wrap_target` selects the first address in the loop, and `.wrap` marks its
-inclusive final instruction. The testbench loads both values into the
-programmable program counter before starting execution.
+`.wrap` marks the inclusive address compared against the program counter.
+When they match, the PC loads the address marked by `.wrap_target`. The
+testbench loads both assembled values into the programmable PC before starting
+execution.

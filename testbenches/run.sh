@@ -30,7 +30,7 @@ program_metadata="$output_dir/${testbench}.meta"
 is_program=0
 program_length=0
 wrap_target=0
-wrap_pc=0
+wrap_address=0
 
 if [[ -f "$program_testbench" && -f "$program_source" ]]; then
     testbench_file="$program_testbench"
@@ -63,7 +63,7 @@ if [[ $is_program -eq 1 ]]; then
     if ! "$python_command" "$programs_dir/assemble.py" "$program_source" --output "$program_hex" --metadata-output "$program_metadata"; then
         exit 1
     fi
-    read -r program_length wrap_target wrap_pc < "$program_metadata"
+    read -r program_length wrap_target wrap_address < "$program_metadata"
 fi
 case "$testbench" in
     square_wave)
@@ -97,7 +97,7 @@ fi
 
 echo "Running $testbench..."
 if [[ $is_program -eq 1 ]]; then
-    vvp "$simulator" "+PROGRAM_HEX=$program_hex" "+PROGRAM_LENGTH=$program_length" "+WRAP_TARGET=$wrap_target" "+WRAP_PC=$wrap_pc" >>"$log_file" 2>&1
+    vvp "$simulator" "+PROGRAM_HEX=$program_hex" "+PROGRAM_LENGTH=$program_length" "+WRAP_TARGET=$wrap_target" "+WRAP_ADDRESS=$wrap_address" >>"$log_file" 2>&1
 else
     vvp "$simulator" >>"$log_file" 2>&1
 fi

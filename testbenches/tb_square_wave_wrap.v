@@ -10,7 +10,7 @@ module tb_square_wave_wrap;
     reg rst_n = 1'b1;
     reg start = 1'b0;
     reg prog_enable = 1'b0;
-    reg [31:0] wrap_pc = 32'd1;
+    reg [31:0] wrap_address = 32'd1;
     reg [31:0] instruction_in = 32'b0;
     reg write_enable = 1'b0;
     wire [31:0] pc_out;
@@ -28,7 +28,7 @@ module tb_square_wave_wrap;
         .start(start),
         .prog_enable(prog_enable),
 		.wrap_target(32'd0),
-        .wrap_pc(wrap_pc),
+        .wrap_address(wrap_address),
         .instruction_in(instruction_in),
         .write_enable(write_enable),
         .pc_out(pc_out),
