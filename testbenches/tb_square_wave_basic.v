@@ -32,8 +32,13 @@ module tb_square_wave_basic;
 
     gpio gpio_i (
         .clk(clk),
+        .rst_n(1'b1),
         .gpio_out(gpio_out),
         .gpio_oe(gpio_oe),
+        .oe_program_write(1'b0),
+        .oe_program_mask(8'b0),
+        .oe_program_value(8'b0),
+        .oe_state(),
         .gpio_in(gpio_in),
         .gpio(gpio)
     );
