@@ -11,6 +11,9 @@ Run a testbench by name or by `.v` filename:
 ```sh
 ./testbenches/run.sh tb_square_wave_basic
 ./testbenches/run.sh tb_square_wave_wrap.v
+./testbenches/run.sh tb_osr_tx
+./testbenches/run.sh uart_lb
+./testbenches/run.sh tb_osr_tx
 ```
 
 The script compiles and runs the selected testbench, prints its log, and opens
@@ -44,3 +47,27 @@ instructions and wrap directives to hex and metadata before simulation:
 When they match, the PC loads the address marked by `.wrap_target`. The
 testbench loads both assembled values into the programmable PC before starting
 execution.
+
+`tb_osr_tx` checks the CPU-facing TX/RX FIFOs, trailing-half OSR parallel
+load, PULL and autopull behavior, decoder-driven OUT, five-cycle IN sampling,
+autopush threshold handling, explicit PUSH, and persistent GPIO direction:
+
+```sh
+./testbenches/run.sh tb_osr_tx
+```
+
+The `uart_lb` program runs separate TX and RX instruction streams on two
+`top_v1` instances, connects TX GPIO[0] to RX GPIO[1], and checks the complete
+`hello world from APIO` message in the RX FIFO:
+
+```sh
+./testbenches/run.sh uart_lb
+```
+
+`tb_osr_tx` checks the CPU-facing TX/RX FIFOs, trailing-half parallel OSR load,
+FIFO PULL into the 64-bit OSR, GPIO input sampling, threshold-based autopush,
+and explicit PUSH:
+
+```sh
+./testbenches/run.sh tb_osr_tx
+```
