@@ -48,21 +48,39 @@ module tb_uart_lb;
     wire tx_instruction_fifo_empty;
     wire [7:0] tx_gpio_in;
     tri [7:0] tx_gpio;
+    wire tx_pin;
 
     wire [31:0] rx_pc_out;
     wire [31:0] rx_instruction_out;
     wire rx_instruction_fifo_empty;
     wire [7:0] rx_gpio_in;
     tri [7:0] rx_gpio;
+    wire rx_pin;
     wire [5:0] rx_fifo_count;
     wire [31:0] rx_fifo_data_out;
     wire rx_fifo_empty;
     wire rx_fifo_full;
     reg rx_fifo_read = 1'b0;
+    reg [31:0] baud_frequency_hz = 32'd10_000_000;
+    wire baud_clk;
+    wire baud_sync = uart_rx.decoder_io_start && uart_rx.decoder_input_shift;
 
     always #(CLOCK_PERIOD_NS / 2) clk = ~clk;
 
+    assign tx_pin = tx_gpio[0];
     assign rx_gpio[1] = tx_gpio[0];
+    assign rx_pin = rx_gpio[1];
+
+    fractional_clock_divider #(
+        .CLOCK_FREQUENCY_HZ(100_000_000)
+    ) baud_clock_debug_i (
+        .clk(clk),
+        .rst_n(rst_n),
+        .enable(rx_start),
+        .sync(baud_sync),
+        .output_frequency_hz(baud_frequency_hz),
+        .divided_clk(baud_clk)
+    );
 
     top_v1 #(
         .TX_FIFO_DEPTH(8),
@@ -264,6 +282,10 @@ module tb_uart_lb;
             $fatal(1, "missing +RX_WRAP_TARGET=<address>");
         if (!$value$plusargs("RX_WRAP_ADDRESS=%d", rx_wrap_address_arg))
             $fatal(1, "missing +RX_WRAP_ADDRESS=<address>");
+        if (!$value$plusargs("BAUD_FREQUENCY_HZ=%d", baud_frequency_hz))
+            baud_frequency_hz = 32'd10_000_000;
+        if (baud_frequency_hz == 0 || baud_frequency_hz > 50_000_000)
+            $fatal(1, "baud frequency must be between 1 and 50000000 Hz");
         if (tx_program_length > PROGRAM_DEPTH || rx_program_length > PROGRAM_DEPTH)
             $fatal(1, "UART program exceeds instruction memory capacity");
 

@@ -12,10 +12,9 @@ Run a testbench by name or by `.v` filename:
 ./testbenches/run.sh tb_square_wave_basic
 ./testbenches/run.sh tb_square_wave_wrap.v
 ./testbenches/run.sh tb_osr_tx
+./testbenches/run.sh tb_fractional_clock_divider
 ./testbenches/run.sh uart_lb
-./testbenches/run.sh tb_osr_tx
 ```
-
 The script compiles and runs the selected testbench, prints its log, and opens
 the generated VCD in GTKWave. Logs and VCD files are written to `/tmp/apio/`.
 
@@ -56,18 +55,17 @@ autopush threshold handling, explicit PUSH, and persistent GPIO direction:
 ./testbenches/run.sh tb_osr_tx
 ```
 
+`tb_fractional_clock_divider` verifies runtime frequency changes on the
+standalone fractional divider:
+
+```sh
+./testbenches/run.sh tb_fractional_clock_divider
+```
+
 The `uart_lb` program runs separate TX and RX instruction streams on two
 `top_v1` instances, connects TX GPIO[0] to RX GPIO[1], and checks the complete
 `hello world from APIO` message in the RX FIFO:
 
 ```sh
 ./testbenches/run.sh uart_lb
-```
-
-`tb_osr_tx` checks the CPU-facing TX/RX FIFOs, trailing-half parallel OSR load,
-FIFO PULL into the 64-bit OSR, GPIO input sampling, threshold-based autopush,
-and explicit PUSH:
-
-```sh
-./testbenches/run.sh tb_osr_tx
 ```

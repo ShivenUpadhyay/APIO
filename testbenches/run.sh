@@ -98,6 +98,9 @@ case "$testbench" in
     tb_osr_tx)
         sources=("$testbench_file" "$repo_root/top_v1.v" "$repo_root/src/"*.v)
         ;;
+    tb_fractional_clock_divider)
+        sources=("$testbench_file" "$repo_root/src/fractional_clock_divider.v")
+        ;;
     tb_square_wave_wrap)
         sources=("$testbench_file" "$repo_root/top_v1.v" "$repo_root/src/"*.v)
         ;;
@@ -124,11 +127,13 @@ echo "Running $testbench..."
 if [[ $is_program -eq 1 ]]; then
     vvp "$simulator" "+PROGRAM_HEX=$program_hex" "+PROGRAM_LENGTH=$program_length" "+WRAP_TARGET=$wrap_target" "+WRAP_ADDRESS=$wrap_address" >>"$log_file" 2>&1
 elif [[ $is_uart_loopback -eq 1 ]]; then
+    baud_frequency_hz="${APIO_UART_BAUD_HZ:-10000000}"
     vvp "$simulator" \
         "+TX_HEX=$output_dir/uart_lb_tx.hex" "+TX_LENGTH=$tx_program_length" \
         "+TX_WRAP_TARGET=$tx_wrap_target" "+TX_WRAP_ADDRESS=$tx_wrap_address" \
         "+RX_HEX=$output_dir/uart_lb_rx.hex" "+RX_LENGTH=$rx_program_length" \
-        "+RX_WRAP_TARGET=$rx_wrap_target" "+RX_WRAP_ADDRESS=$rx_wrap_address" >>"$log_file" 2>&1
+        "+RX_WRAP_TARGET=$rx_wrap_target" "+RX_WRAP_ADDRESS=$rx_wrap_address" \
+        "+BAUD_FREQUENCY_HZ=$baud_frequency_hz" >>"$log_file" 2>&1
 else
     vvp "$simulator" >>"$log_file" 2>&1
 fi

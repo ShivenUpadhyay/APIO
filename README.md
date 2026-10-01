@@ -113,6 +113,13 @@ write, full, empty, and count; RX FIFO data, read, full, empty, and count; OSR
 parallel load/data/valid count; and autopull/autopush configuration. The RTL
 does not yet define a memory-mapped CPU bus.
 
+`src/fractional_clock_divider.v` is a standalone divider. Its
+`CLOCK_FREQUENCY_HZ` parameter sets the source clock, while its
+`output_frequency_hz` input programs the output frequency at runtime. The
+supported range is 1 Hz through half the source-clock frequency. It is not
+connected to `top_v1`; the UART testbench uses it as a synchronized waveform
+reference.
+
 The UART loopback example runs the TX and RX programs on separate `top_v1`
 instances and connects TX GPIO[0] to RX GPIO[1]:
 
