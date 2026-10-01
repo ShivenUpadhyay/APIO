@@ -120,7 +120,7 @@ Output is written to `/tmp/apio/`:
 To inspect a child module, pass its module name to the same script:
 
 ```sh
-./synthesize.sh decoder --hier
+./synthesize.sh decoder_v1 --hier
 ```
 
 This resolves the matching file in `src/` and opens the hierarchy viewer for
